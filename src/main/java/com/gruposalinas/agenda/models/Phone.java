@@ -1,35 +1,41 @@
 package com.gruposalinas.agenda.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-@Entity 
-@Table(name = "phone") 
+@Entity
+@Table(name = "phone")
 public class Phone {
 
-    @Id 
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column (nullable=false, length = 15)
+    @NotBlank
+    @Size(max = 15)
+    @Column(nullable = false, length = 15)
     private String number;
 
-    @Enumerated (EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private PhoneType type;
+    @OneToMany(
+        mappedBy = "phone",
+        fetch = FetchType.LAZY
+    )
+    private List<ContactPhone> contacts = new ArrayList<>();
 
-    @ManyToOne(fetch =  FetchType.LAZY, optional = false)
-    @JoinColumn(name="contact_id" , nullable = false) 
-    private Contact contact;
+    public Phone() {
+    }
 
     public Long getId() {
         return id;
@@ -47,22 +53,11 @@ public class Phone {
         this.number = number;
     }
 
-    public PhoneType getType() {
-        return type;
+    public List<ContactPhone> getContacts() {
+        return contacts;
     }
 
-    public void setType(PhoneType type) {
-        this.type = type;
+    public void setContacts(List<ContactPhone> contacts) {
+        this.contacts = contacts;
     }
-
-    public Contact getContact() {
-        return contact;
-    }
-
-    public void setContact(Contact contact) {
-        this.contact = contact;
-    }
-
-    
-
 }
