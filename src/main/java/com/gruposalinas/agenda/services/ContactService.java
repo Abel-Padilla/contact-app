@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gruposalinas.agenda.dtos.ContactPatchRequest;
 import com.gruposalinas.agenda.dtos.ContactRequest;
 import com.gruposalinas.agenda.dtos.ContactResponse;
 import com.gruposalinas.agenda.dtos.PhoneRequest;
@@ -55,21 +56,33 @@ public class ContactService {
                 "The contact doesn't exist"));
     }
 
-    public ContactResponse update(
-            Long id,
-            ContactRequest request) {
+    @Transactional
+    public ContactResponse update(Long id, ContactRequest request) {
         Contact contact = getContact(id);
 
-        for (Phone phone : new ArrayList<>(contact.getPhone())) {
-            contact.removePhone(phone);
+        if (request.fullName() != null) {
+            contact.setFullName(request.fullName());
         }
 
-        mapRequest(contact, request);
+        if (request.email() != null) {
+            contact.setEmail(request.email());
+        }
 
-        Contact updatedContact = contactRepository.save(contact);
+        if (request.phones() != null) {
+            contact.getPhone().clear();
 
-        return toResponse(updatedContact);
+            for (PhoneRequest phoneRequest : request.phones()) {
+                Phone phone = new Phone();
+                phone.setNumber(phoneRequest.number());
+                phone.setType(phoneRequest.type());
 
+                contact.addPhone(phone);
+            }
+        }
+
+        Contact savedContact = contactRepository.save(contact);
+
+        return toResponse(savedContact);
     }
 
     public void delete(Long id) {
